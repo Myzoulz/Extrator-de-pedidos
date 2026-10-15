@@ -1,36 +1,115 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Extrator de pedidos com LLM
 
-## Getting Started
+O usuário cola uma mensagem de pedido em texto livre (ex.: *"2 x-burger, rua das Flores 123 apto 4, pago no pix, obs: sem cebola"*) e recebe os dados estruturados em um **formulário editável**: cliente, telefone, endereço, itens (nome + quantidade + observação), forma de pagamento, troco e observações gerais.
 
-First, run the development server:
+A extração é feita com **tool use forçado**: o modelo sempre chama uma única ferramenta `registrar_pedido` cujo *input* é o **schema Zod** do pedido (`schemas/pedido.ts` — fonte única da verdade). A saída é revalidada pelo mesmo schema antes de chegar ao cliente; se for inválida, a API responde `422`.
+
+## Provedores
+
+Dá para usar **Google Gemini (grátis)** ou **Anthropic**, escolhido por `LLM_PROVIDER` no `.env.local`. O schema Zod é convertido no formato de cada um automaticamente:
+
+- **Gemini** (`@google/genai`): `parametersJsonSchema` no formato OpenAPI 3.0 + `toolConfig.functionCallingConfig.mode = ANY` com `allowedFunctionNames: ["registrar_pedido"]`.
+- **Anthropic** (`@anthropic-ai/sdk`): `tools` + `tool_choice: { type: "tool", name: "registrar_pedido" }`.
+
+## Stack
+
+- Next.js (App Router, TypeScript) + Tailwind v4
+- `zod` (v4), `@google/genai`, `@anthropic-ai/sdk`, `vitest`
+- Chaves em `.env.local`, usadas **só no servidor**
+
+## Como rodar
+
+```bash
+npm install
+```
+
+1. Copie `.env.local.example` para `.env.local`.
+2. Escolha o provedor e cole a chave:
+
+   **Gemini (grátis, sem cartão):**
+   - Crie a chave em https://aistudio.google.com/apikey (login Google).
+   - No `.env.local`: `LLM_PROVIDER=gemini` e `GEMINI_API_KEY=...`
+
+   **Anthropic (paga):**
+   - Crie a chave em https://console.anthropic.com/settings/keys.
+   - No `.env.local`: `LLM_PROVIDER=anthropic` e `ANTHROPIC_API_KEY=...`
+
+3. Suba o app:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Abra http://localhost:3000, cole uma mensagem e clique em **Extrair**.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+> Nota LGPD: os free tiers (Gemini/Groq) podem usar os prompts para treino. Os casos de avaliação já são anonimizados, mas evite colar dados reais de clientes.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## API
 
-## Learn More
+`POST /api/extract`
 
-To learn more about Next.js, take a look at the following resources:
+```json
+{ "texto": "2 x-burger, rua das Flores 123, pago no pix" }
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Resposta `200`:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```json
+{ "pedido": { "cliente": null, "itens": [...], ... }, "tentativas": 1, "uso": { "entrada": 512, "saida": 96 } }
+```
 
-## Deploy on Vercel
+| Status | Quando |
+| ------ | ------ |
+| `400`  | corpo/JSON inválido ou mensagem vazia |
+| `422`  | a LLM respondeu, mas a saída não bate com o schema |
+| `500`  | chave do provedor ausente (`GEMINI_API_KEY`/`ANTHROPIC_API_KEY`) |
+| `502`  | falha do provedor (rede, 429, 5xx) após 1 retry |
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Cada chamada tem timeout de 20s e **no máximo 1 retry** em falhas transitórias
+(no Gemini, `429` de limite diário não é repetido — ver "Cota do free tier").
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Avaliação
+
+A suíte (`evals/casos.json`) contém ~24 mensagens anonimizadas (LGPD) com o resultado esperado, incluindo casos difíceis: abreviações (`2x xtudo`), itens sem quantidade, endereço incompleto, quantidade por extenso e mensagens sem forma de pagamento.
+
+```bash
+npm run eval      # roda a suíte de avaliação (chama a API; precisa de chave)
+npm test          # suíte unitária — não chama API nenhuma
+```
+
+> `evals/eval.test.ts` é separado do `npm test` de propósito: rodar os testes
+> não deve consumir cota da API.
+
+O relatório traz o **acerto geral campo a campo**, o **acerto por campo** e a
+lista de **casos com divergência**.
+
+**Resultado do eval** (`GEMINI_MODEL=gemini-flash-lite-latest`, 24 casos):
+
+- **Acerto geral (campo a campo): 95.5%**
+- **Casos 100% corretos: 19/24 (79.2%)**
+- Por campo: `cliente` 100%, `endereco.*` 100%, `formaPagamento` 100%,
+  `telefone` 100%, `troco` 100%, `itens` **79.2% (19/24)**
+
+Os 5 casos que ainda divergem falham só em `itens` e por rigidez do comparador
+(exigência de nome idêntico, ex.: esperava `fritas`/`refrigerante` e o modelo
+escreveu `porção de fritas`/`refrigerantes`) — não é extração quebrada.
+
+### Cota do free tier
+
+O Gemini free tier dá **~20 requisições/dia por modelo**. Com isso a suíte de
+24 casos não cabe num único dia no modelo padrão — por isso o padrão é
+`gemini-flash-lite-latest`, que tem cota suficiente. O provedor só repete
+requisição quando o próprio Google devolve um `retryDelay` curto, para não
+queimar cota com retry inútil de limite diário.
+
+## Estrutura
+
+```
+schemas/pedido.ts          schema Zod do pedido (fonte única da verdade)
+lib/erros.ts               erros compartilhados
+lib/provedores/            adaptadores (anthropic, gemini) + seleção por env
+lib/extrair-pedido.ts      valida a entrada, delega ao provedor, retry
+app/api/extract/route.ts   rota POST /api/extract
+app/components/            UI (textarea + formulário editável)
+evals/                     casos + runner de avaliação
+```

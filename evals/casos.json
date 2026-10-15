@@ -1,0 +1,280 @@
+[
+  {
+    "id": "simples-pix",
+    "entrada": "Oi, quero 2 x-burger e uma coca lata. Rua das Flores 123, apto 4. Pago no pix. Meu nome é Ana",
+    "esperado": {
+      "cliente": "Ana",
+      "endereco": { "rua": "Rua das Flores", "numero": "123", "complemento": "apto 4" },
+      "itens": [
+        { "nome": "x-burger", "quantidade": 2 },
+        { "nome": "coca lata", "quantidade": 1 }
+      ],
+      "formaPagamento": "pix"
+    }
+  },
+  {
+    "id": "multiplos-itens",
+    "entrada": "Boa noite, manda 3 hamburguer, 2 porções de fritas e 4 refrigerantes. Rua Central, 45. Dinheiro.",
+    "esperado": {
+      "endereco": { "rua": "Rua Central", "numero": "45" },
+      "itens": [
+        { "nome": "hamburguer", "quantidade": 3 },
+        { "nome": "fritas", "quantidade": 2 },
+        { "nome": "refrigerante", "quantidade": 4 }
+      ],
+      "formaPagamento": "dinheiro"
+    }
+  },
+  {
+    "id": "sem-quantidade",
+    "entrada": "Queria um x-tudo e uma porcao de batata. Rua Verde 10. Vou pagar no cartao de credito",
+    "esperado": {
+      "endereco": { "rua": "Rua Verde", "numero": "10" },
+      "itens": [
+        { "nome": "x-tudo", "quantidade": 1 },
+        { "nome": "batata", "quantidade": 1 }
+      ],
+      "formaPagamento": "cartao"
+    }
+  },
+  {
+    "id": "endereco-incompleto",
+    "entrada": "2 pizzas de calabresa por favor, entrega na Rua Amarela. Pago no pix",
+    "esperado": {
+      "endereco": { "rua": "Rua Amarela", "numero": null },
+      "itens": [{ "nome": "pizza de calabresa", "quantidade": 2 }],
+      "formaPagamento": "pix"
+    }
+  },
+  {
+    "id": "troco-para-100",
+    "entrada": "Manda um combo bacon, rua azul 200 casa 3. Vou pagar em dinheiro, troco para 100",
+    "esperado": {
+      "endereco": { "rua": "rua azul", "numero": "200", "complemento": "casa 3" },
+      "itens": [{ "nome": "combo bacon", "quantidade": 1 }],
+      "formaPagamento": "dinheiro",
+      "troco": 100
+    }
+  },
+  {
+    "id": "cartao-debito",
+    "entrada": "bom dia, 1 acai 500ml, rua das palmeiras 77, cartão de débito",
+    "esperado": {
+      "endereco": { "rua": "rua das palmeiras", "numero": "77" },
+      "itens": [{ "nome": "acai 500ml", "quantidade": 1 }],
+      "formaPagamento": "cartao"
+    }
+  },
+  {
+    "id": "observacao-geral",
+    "entrada": "2 hot dog e 1 suco de laranja. Rua B 12 apto 302. Pix. Obs: entregar rápido por favor, estou com fome",
+    "esperado": {
+      "endereco": { "numero": "12", "complemento": "apto 302" },
+      "itens": [
+        { "nome": "hot dog", "quantidade": 2 },
+        { "nome": "suco de laranja", "quantidade": 1 }
+      ],
+      "formaPagamento": "pix"
+    }
+  },
+  {
+    "id": "observacao-item",
+    "entrada": "1 x-salada sem cebola e 1 x-bacon com molho extra, rua 7 de setembro 300, dinheiro",
+    "esperado": {
+      "endereco": { "rua": "rua 7 de setembro", "numero": "300" },
+      "itens": [
+        { "nome": "x-salada", "quantidade": 1, "observacao": "sem cebola" },
+        { "nome": "x-bacon", "quantidade": 1 }
+      ],
+      "formaPagamento": "dinheiro"
+    }
+  },
+  {
+    "id": "abreviacao-2x",
+    "entrada": "2x xtudo e 2x coca, av brigadeiro 55, pix",
+    "esperado": {
+      "endereco": { "rua": "av brigadeiro", "numero": "55" },
+      "itens": [
+        { "nome": "xtudo", "quantidade": 2 },
+        { "nome": "coca", "quantidade": 2 }
+      ],
+      "formaPagamento": "pix"
+    }
+  },
+  {
+    "id": "com-telefone",
+    "entrada": "oi, sou o Carlos, tel 11 91234-5678. quero 1 pizza portuguesa. rua ipiranga 900, bairro jardim. pix",
+    "esperado": {
+      "cliente": "Carlos",
+      "telefone": "11 91234-5678",
+      "endereco": { "rua": "rua ipiranga", "numero": "900", "bairro": "jardim" },
+      "itens": [{ "nome": "pizza portuguesa", "quantidade": 1 }],
+      "formaPagamento": "pix"
+    }
+  },
+  {
+    "id": "sem-nome-cliente",
+    "entrada": "1 hamburguer duplo e batata grande, rua xavier 144, cartao",
+    "esperado": {
+      "cliente": null,
+      "endereco": { "rua": "rua xavier", "numero": "144" },
+      "itens": [
+        { "nome": "hamburguer duplo", "quantidade": 1 },
+        { "nome": "batata grande", "quantidade": 1 }
+      ],
+      "formaPagamento": "cartao"
+    }
+  },
+  {
+    "id": "sem-pagamento",
+    "entrada": "manda 2 pastel de carne e 1 caldo de cana, rua do sol 33",
+    "esperado": {
+      "endereco": { "rua": "rua do sol", "numero": "33" },
+      "itens": [
+        { "nome": "pastel de carne", "quantidade": 2 },
+        { "nome": "caldo de cana", "quantidade": 1 }
+      ],
+      "formaPagamento": "nao_informado"
+    }
+  },
+  {
+    "id": "referencia",
+    "entrada": "quero 1 marmita fitness, entrego ao lado do mercado central, rua sao joao 20, dinheiro",
+    "esperado": {
+      "endereco": { "rua": "rua sao joao", "numero": "20" },
+      "itens": [{ "nome": "marmita fitness", "quantidade": 1 }],
+      "formaPagamento": "dinheiro"
+    }
+  },
+  {
+    "id": "numero-sn",
+    "entrada": "2 esfiha e 1 kibe, rua do comercio s/n, pix",
+    "esperado": {
+      "endereco": { "rua": "rua do comercio", "numero": "s/n" },
+      "itens": [
+        { "nome": "esfiha", "quantidade": 2 },
+        { "nome": "kibe", "quantidade": 1 }
+      ],
+      "formaPagamento": "pix"
+    }
+  },
+  {
+    "id": "complemento-fundos",
+    "entrada": "1 bauru, rua das acacias 400 fundos, cartao de credito",
+    "esperado": {
+      "endereco": { "rua": "rua das acacias", "numero": "400", "complemento": "fundos" },
+      "itens": [{ "nome": "bauru", "quantidade": 1 }],
+      "formaPagamento": "cartao"
+    }
+  },
+  {
+    "id": "quantidade-por-extenso",
+    "entrada": "queria duas pizzas marguerita e tres guarana, rua bela 78, pix",
+    "esperado": {
+      "endereco": { "rua": "rua bela", "numero": "78" },
+      "itens": [
+        { "nome": "pizza marguerita", "quantidade": 2 },
+        { "nome": "guarana", "quantidade": 3 }
+      ],
+      "formaPagamento": "pix"
+    }
+  },
+  {
+    "id": "retirada-sem-endereco",
+    "entrada": "vou retirar no balcão, 1 combo kids. dinheiro",
+    "esperado": {
+      "itens": [{ "nome": "combo kids", "quantidade": 1 }],
+      "formaPagamento": "dinheiro"
+    }
+  },
+  {
+    "id": "troco-pago-com-50",
+    "entrada": "2 coxinhas e 1 cafe, rua nova 5, pago com 50 em dinheiro",
+    "esperado": {
+      "endereco": { "rua": "rua nova", "numero": "5" },
+      "itens": [
+        { "nome": "coxinha", "quantidade": 2 },
+        { "nome": "cafe", "quantidade": 1 }
+      ],
+      "formaPagamento": "dinheiro",
+      "troco": 50
+    }
+  },
+  {
+    "id": "bebida-e-comida",
+    "entrada": "1 yakisoba e 2 agua sem gas, rua dos andradas 210 apto 12, pix",
+    "esperado": {
+      "endereco": { "rua": "rua dos andradas", "numero": "210", "complemento": "apto 12" },
+      "itens": [
+        { "nome": "yakisoba", "quantidade": 1 },
+        { "nome": "agua sem gas", "quantidade": 2 }
+      ],
+      "formaPagamento": "pix"
+    }
+  },
+  {
+    "id": "bairro-cidade",
+    "entrada": "1 frango assado, rua farrapos 88, bairro floresta, porto alegre. cartao",
+    "esperado": {
+      "endereco": {
+        "rua": "rua farrapos",
+        "numero": "88",
+        "bairro": "floresta",
+        "cidade": "porto alegre"
+      },
+      "itens": [{ "nome": "frango assado", "quantidade": 1 }],
+      "formaPagamento": "cartao"
+    }
+  },
+  {
+    "id": "tudo-junto",
+    "entrada": "Boa! sou a Julia, tel (21) 98888-1111. quero 2 x-burger, 1 x-salada sem tomate, 3 cervejas. Entrega rua litoral 1500 bloco b apto 101, bairro praia. Vou pagar no cartao de débito, troco não precisa",
+    "esperado": {
+      "cliente": "Julia",
+      "telefone": "(21) 98888-1111",
+      "endereco": {
+        "rua": "rua litoral",
+        "numero": "1500",
+        "complemento": "bloco b apto 101",
+        "bairro": "praia"
+      },
+      "itens": [
+        { "nome": "x-burger", "quantidade": 2 },
+        { "nome": "x-salada", "quantidade": 1, "observacao": "sem tomate" },
+        { "nome": "cerveja", "quantidade": 3 }
+      ],
+      "formaPagamento": "cartao"
+    }
+  },
+  {
+    "id": "observacao-geral-2",
+    "entrada": "2 cachorro quente, rua imperial 30. sem mostarda por favor. dinheiro",
+    "esperado": {
+      "endereco": { "rua": "rua imperial", "numero": "30" },
+      "itens": [{ "nome": "cachorro quente", "quantidade": 2 }],
+      "formaPagamento": "dinheiro"
+    }
+  },
+  {
+    "id": "item-composto",
+    "entrada": "1 hamburguer com bacon e cheddar e 1 milkshake de chocolate, rua das dunas 9, pix",
+    "esperado": {
+      "endereco": { "rua": "rua das dunas", "numero": "9" },
+      "itens": [{ "nome": "hamburguer com bacon e cheddar", "quantidade": 1 }],
+      "formaPagamento": "pix"
+    }
+  },
+  {
+    "id": "sem-cliente-sem-pagamento",
+    "entrada": "3 paes de queijo e 1 cafe com leite, rua curitiba 250",
+    "esperado": {
+      "cliente": null,
+      "endereco": { "rua": "rua curitiba", "numero": "250" },
+      "itens": [
+        { "nome": "pao de queijo", "quantidade": 3 },
+        { "nome": "cafe com leite", "quantidade": 1 }
+      ],
+      "formaPagamento": "nao_informado"
+    }
+  }
+]

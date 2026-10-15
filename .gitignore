@@ -32,6 +32,18 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+!.env.example
+!.env.local.example
+
+# contexto/planejamento local de desenvolvimento (não versionar)
+/AGENTS.md
+/CLAUDE.md
+/GEMINI.md
+/.cursorrules
+/.cursor/
+/.github/copilot-instructions.md
+/plano-projeto-extrator-llm.md
+/plano-*.md
 
 # vercel
 .vercel
